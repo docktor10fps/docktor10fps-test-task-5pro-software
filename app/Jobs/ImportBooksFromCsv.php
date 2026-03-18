@@ -2,14 +2,14 @@
 
 namespace App\Jobs;
 
-use App\Services\BookImportService;
+use App\Services\Import\BookImportService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class ImportBooksFromCsv implements ShouldQueue
 {
@@ -23,7 +23,7 @@ class ImportBooksFromCsv implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        protected string $filePath
+        private string $path
     ) {}
 
     /**
@@ -31,22 +31,27 @@ class ImportBooksFromCsv implements ShouldQueue
      */
     public function handle(BookImportService $service): void
     {
-        $fullPath = Storage::path($this->filePath);
-
-        if (!Storage::exists($this->filePath)) {
-            Log::error("ImportBooksFromCsv: File not found at path {$fullPath}");
+        if (!file_exists($this->path)) {
+            Log::error("ImportBooksFromCsv: File not found at path {$this->path}.");
             return;
         }
 
         try {
-            $service->import($fullPath);
+            Log::info("ImportBooksFromCsv: Start importing a file {$this->path}");
 
-            Storage::delete($this->filePath);
+            $service->import($this->path);
 
-            Log::info("ImportBooksFromCsv: The import of file {$this->filePath} was successful.");
-        } catch (\Exception $e) {
-            Log::error("ImportBooksFromCsv: Error during import: " . $e->getMessage());
+            if (is_file($this->path)) {
+                unlink($this->path);
+            }
 
+            Log::info("ImportBooksFromCsv: The import was completed successfully.");
+
+        } catch (Throwable $e) {
+            Log::error("ImportBooksFromCsv: Critical error during import. Details: " . $e->getMessage(), [
+                'file_path' => $this->path,
+                'exception' => $e
+            ]);
             throw $e;
         }
     }

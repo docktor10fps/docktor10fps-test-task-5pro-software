@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ImportBooksRequest;
 use App\Jobs\ImportBooksFromCsv;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 class BookImportController extends Controller
@@ -17,7 +18,7 @@ class BookImportController extends Controller
     {
         $path = $request->file('file')->store('imports');
 
-        ImportBooksFromCsv::dispatch($path);
+        ImportBooksFromCsv::dispatch(Storage::path($path));
 
         return response()->json([
             'status' => 'queued',
