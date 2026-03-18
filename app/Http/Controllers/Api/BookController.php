@@ -7,70 +7,55 @@ use App\Http\Requests\BookStoreRequest;
 use App\Http\Resources\BookCollection;
 use App\Http\Resources\BookResource;
 use App\Models\Book;
+use App\Services\BookService;
 use Illuminate\Http\Response;
 
 class BookController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct(
+        private BookService $service
+    ) {}
+
     public function index(): BookCollection
     {
-        $books = Book::with(['authors', 'publisher'])->paginate(10);
-
-        return new BookCollection($books);
+        return new BookCollection(
+            $this->service->paginate()
+        );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(BookStoreRequest $request): BookResource
     {
-        $book = Book::create($request->validated());
+        $book = $this->service->create(
+            $request->validated(),
+            $request->author_ids ?? [],
+            $request->genre_ids ?? []
+        );
 
-        if ($request->has('author_ids')) {
-            $book->authors()->sync($request->author_ids);
-        }
-
-        if ($request->has('genre_ids')) {
-            $book->genres()->sync($request->genre_ids);
-        }
-
-        return new BookResource($book->load(['authors', 'publisher']));
+        return new BookResource($book);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Book $book): BookResource
     {
-        return new BookResource($book->load(['authors', 'publisher', 'genres']));
+        return new BookResource(
+            $this->service->show($book)
+        );
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(BookStoreRequest $request, Book $book): BookResource
     {
-        $book->update($request->validated());
+        $book = $this->service->update(
+            $book,
+            $request->validated(),
+            $request->author_ids ?? [],
+            $request->genre_ids ?? []
+        );
 
-        if ($request->has('author_ids')) {
-            $book->authors()->sync($request->author_ids);
-        }
-
-        if ($request->has('genre_ids')) {
-            $book->genres()->sync($request->genre_ids);
-        }
-
-        return new BookResource($book->load(['authors', 'publisher']));
+        return new BookResource($book);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Book $book): Response
     {
-        $book->delete();
+        $this->service->delete($book);
 
         return response()->noContent();
     }
