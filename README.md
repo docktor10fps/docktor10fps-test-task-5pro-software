@@ -73,3 +73,17 @@ curl -X POST http://localhost/api/books/import \
 Імпорт виконується асинхронно. У відповідь повертається статус `202 Accepted`.
 
 Очікувані колонки у CSV: `Title`, `Authors`, `Publisher`, `Year`, `ISBN`, `Description`, `Edition`, `Pages`, `Format`, `Country`, `Genre`.
+
+## Тести
+
+```bash
+docker exec -it book_api_app php artisan test
+```
+
+Проєкт містить 24 тести (86 assertions):
+
+| Тип | Файл | Що покриває |
+|---|---|---|
+| Unit | `RowNormalizerTest` | Парсинг рядків CSV |
+| Feature | `BookControllerTest` | CRUD ендпоінти |
+| Feature | `BookImportControllerTest` | Завантаження CSV файлу |
