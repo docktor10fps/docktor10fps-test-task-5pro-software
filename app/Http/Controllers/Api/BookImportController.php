@@ -12,7 +12,35 @@ use Symfony\Component\HttpFoundation\Response;
 class BookImportController extends Controller
 {
     /**
-     * Handle the incoming request.
+     * @OA\Post(
+     *     path="/books/import",
+     *     summary="Імпорт книг з CSV",
+     *     tags={"Books"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"file"},
+     *                 @OA\Property(
+     *                     property="file",
+     *                     type="string",
+     *                     format="binary",
+     *                     description="CSV файл (максимум 10 МБ)"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=202,
+     *         description="Файл прийнято, імпорт виконується асинхронно",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="queued"),
+     *             @OA\Property(property="path", type="string", example="imports/books.csv")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Помилка валідації")
+     * )
      */
     public function __invoke(ImportBooksRequest $request): JsonResponse
     {
@@ -22,7 +50,7 @@ class BookImportController extends Controller
 
         return response()->json([
             'status' => 'queued',
-            'path' => $path,
+            'path'   => $path,
         ], Response::HTTP_ACCEPTED);
     }
 }

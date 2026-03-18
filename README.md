@@ -74,6 +74,20 @@ curl -X POST http://localhost/api/books/import \
 
 Очікувані колонки у CSV: `Title`, `Authors`, `Publisher`, `Year`, `ISBN`, `Description`, `Edition`, `Pages`, `Format`, `Country`, `Genre`.
 
+## Документація API (Swagger)
+
+Після запуску проєкту Swagger UI доступний за адресою:
+
+```
+http://localhost:8080/api/documentation#/
+```
+
+Для регенерації документації:
+
+```bash
+docker exec -it book_api_app php artisan l5-swagger:generate
+```
+
 ## Тести
 
 ```bash
