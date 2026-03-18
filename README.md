@@ -33,7 +33,7 @@ cp .env.example .env
 ### 3. Запуск контейнерів
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
 
 ### 4. Встановлення залежностей та міграції
