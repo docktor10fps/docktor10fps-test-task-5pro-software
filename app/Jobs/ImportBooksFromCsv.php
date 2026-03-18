@@ -41,10 +41,6 @@ class ImportBooksFromCsv implements ShouldQueue
 
             $service->import($this->path);
 
-            if (is_file($this->path)) {
-                unlink($this->path);
-            }
-
             Log::info("ImportBooksFromCsv: The import was completed successfully.");
 
         } catch (Throwable $e) {
@@ -53,6 +49,10 @@ class ImportBooksFromCsv implements ShouldQueue
                 'exception' => $e
             ]);
             throw $e;
+        } finally {
+            if (is_file($this->path)) {
+                unlink($this->path);
+            }
         }
     }
 }
